@@ -18,3 +18,21 @@ def test_embedding_column_allows_multiple_model_dimensions() -> None:
     embedding_type = Base.metadata.tables["embeddings"].c.embedding.type
 
     assert embedding_type.dim is None
+
+
+def test_chunks_record_strategy_and_multi_section_provenance() -> None:
+    chunks = Base.metadata.tables["chunks"]
+
+    assert "source_section_ids" in chunks.c
+    assert "chunking_strategy" in chunks.c
+    assert "chunking_config" in chunks.c
+
+
+def test_sections_preserve_detected_legal_semantics() -> None:
+    sections = Base.metadata.tables["document_sections"]
+
+    assert "kind" in sections.c
+    assert "label" in sections.c
+    assert "page" in sections.c
+    assert "pipeline_signature" in sections.c
+    assert "pipeline_signature" in Base.metadata.tables["chunks"].c

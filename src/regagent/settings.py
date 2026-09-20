@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     environment: Literal["development", "test", "production"] = "development"
     log_level: str = "INFO"
     database_url: str = (
-        "postgresql+psycopg://regagent:regagent@localhost:5432/regagent"
+        "postgresql+psycopg://regagent:regagent@localhost:55432/regagent"
     )
     embedding_model: str = "BAAI/bge-m3"
     llm_provider: str = "mock"
@@ -37,4 +37,3 @@ def get_settings() -> Settings:
     """Return one immutable-by-convention settings object per process."""
 
     return Settings()
-

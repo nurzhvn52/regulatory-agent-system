@@ -9,6 +9,9 @@ Use PostgreSQL as the system of record for documents, versions, sections, experi
 runs, and citations. Use pgvector for dense embeddings. Keep the BM25 research baseline
 behind a separate retrieval adapter.
 
+The development container is exposed on host port `55432` because the development
+machine already has a separate PostgreSQL instance listening on the default port `5432`.
+
 ## Rationale
 
 Regulatory analysis requires relational version metadata as well as vector similarity.

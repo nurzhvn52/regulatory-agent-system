@@ -77,8 +77,15 @@ class DocumentVersionRecord(Base):
 class DocumentSectionRecord(Base):
     __tablename__ = "document_sections"
     __table_args__ = (
-        UniqueConstraint("version_id", "ordinal", name="uq_section_version_ordinal"),
+        UniqueConstraint(
+            "version_id",
+            "pipeline_signature",
+            "ordinal",
+            name="uq_section_version_pipeline_ordinal",
+        ),
+        CheckConstraint("page IS NULL OR page > 0", name="ck_section_positive_page"),
         Index("ix_sections_version", "version_id"),
+        Index("ix_sections_version_pipeline", "version_id", "pipeline_signature"),
         Index("ix_sections_article", "article"),
     )
 
@@ -86,23 +93,34 @@ class DocumentSectionRecord(Base):
     version_id: Mapped[UUID] = mapped_column(
         PGUUID(as_uuid=True), ForeignKey("document_versions.id", ondelete="CASCADE")
     )
+    pipeline_signature: Mapped[str] = mapped_column(String(64))
     parent_id: Mapped[UUID | None] = mapped_column(
         PGUUID(as_uuid=True), ForeignKey("document_sections.id", ondelete="CASCADE")
     )
     ordinal: Mapped[int] = mapped_column(Integer)
+    kind: Mapped[str] = mapped_column(String(50))
+    label: Mapped[str | None] = mapped_column(String(100))
     heading: Mapped[str | None] = mapped_column(Text)
     article: Mapped[str | None] = mapped_column(String(100))
     paragraph: Mapped[str | None] = mapped_column(String(100))
     hierarchy_path: Mapped[list[str]] = mapped_column(JSONB, default=list)
     text: Mapped[str] = mapped_column(Text)
+    page: Mapped[int | None] = mapped_column(Integer)
 
 
 class ChunkRecord(Base):
     __tablename__ = "chunks"
     __table_args__ = (
-        UniqueConstraint("section_id", "ordinal", name="uq_chunk_section_ordinal"),
+        UniqueConstraint(
+            "version_id",
+            "pipeline_signature",
+            "chunking_strategy",
+            "ordinal",
+            name="uq_chunk_version_pipeline_strategy_ordinal",
+        ),
         CheckConstraint("token_count > 0", name="ck_chunk_positive_token_count"),
         Index("ix_chunks_version", "version_id"),
+        Index("ix_chunks_version_pipeline", "version_id", "pipeline_signature"),
         Index("ix_chunks_section", "section_id"),
     )
 
@@ -110,6 +128,7 @@ class ChunkRecord(Base):
     version_id: Mapped[UUID] = mapped_column(
         PGUUID(as_uuid=True), ForeignKey("document_versions.id", ondelete="CASCADE")
     )
+    pipeline_signature: Mapped[str] = mapped_column(String(64))
     section_id: Mapped[UUID] = mapped_column(
         PGUUID(as_uuid=True), ForeignKey("document_sections.id", ondelete="CASCADE")
     )
@@ -118,6 +137,9 @@ class ChunkRecord(Base):
     content_hash: Mapped[str] = mapped_column(String(128))
     token_count: Mapped[int] = mapped_column(Integer)
     hierarchy_path: Mapped[list[str]] = mapped_column(JSONB, default=list)
+    source_section_ids: Mapped[list[str]] = mapped_column(JSONB)
+    chunking_strategy: Mapped[str] = mapped_column(String(100))
+    chunking_config: Mapped[dict[str, Any]] = mapped_column(JSONB, default=dict)
 
 
 class EmbeddingRecord(Base):

@@ -54,3 +54,26 @@ be cited and reproduced in the dissertation.
 The embedding column intentionally accepts multiple dimensions. Once a model is selected
 for a concrete experiment, a model-specific partial HNSW index can be added without
 preventing comparison with embeddings of another dimensionality.
+
+## Ingest a document
+
+The development database is exposed on port `55432` to avoid collisions with a local
+PostgreSQL installation. An ingestion run stores both the fixed-window baseline and the
+legal-structure chunks:
+
+```powershell
+poetry run regagent ingest data/raw/document.html `
+  --source-url "https://official.example/document" `
+  --publisher "Official publisher" `
+  --issuer "Issuing authority" `
+  --language ru `
+  --act-type law `
+  --official-number "ACT-001"
+```
+
+Running the same command again is idempotent: an unchanged content hash returns
+`duplicate: true`. A changed source is stored as another document version.
+
+Supported inputs are HTML, DOCX, text-based PDF, and UTF-8 TXT. An image-only PDF fails
+with an explicit OCR-required error; OCR will be implemented as a separate adapter so it
+can be evaluated independently.
