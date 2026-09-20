@@ -1,0 +1,21 @@
+name: version-comparison-ru-kk
+task_type: version_comparison
+languages:
+  - ru
+  - kk
+retrieval_strategy: hybrid_rerank
+top_k: 25
+reranker_enabled: true
+tools:
+  - document_search
+  - read_section
+  - lookup_version
+  - compare_versions
+  - verify_citations
+verification:
+  citations_required: true
+  entailment_check: true
+  refuse_without_evidence: true
+  require_effective_version: true
+output_schema: version_comparison_v1
+

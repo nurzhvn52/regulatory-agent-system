@@ -1,0 +1,20 @@
+name: cited-qa-ru-kk
+task_type: cited_qa
+languages:
+  - ru
+  - kk
+retrieval_strategy: hybrid_rerank
+top_k: 15
+reranker_enabled: true
+tools:
+  - document_search
+  - read_section
+  - lookup_version
+  - verify_citations
+verification:
+  citations_required: true
+  entailment_check: true
+  refuse_without_evidence: true
+  require_effective_version: true
+output_schema: cited_answer_v1
+

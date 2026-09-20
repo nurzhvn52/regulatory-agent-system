@@ -1,0 +1,19 @@
+name: requirement-extraction-ru-kk
+task_type: requirement_extraction
+languages:
+  - ru
+  - kk
+retrieval_strategy: hybrid_rerank
+top_k: 20
+reranker_enabled: true
+tools:
+  - document_search
+  - read_section
+  - verify_citations
+verification:
+  citations_required: true
+  entailment_check: true
+  refuse_without_evidence: true
+  require_effective_version: true
+output_schema: regulatory_requirements_v1
+
