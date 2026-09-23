@@ -5,6 +5,7 @@ from typing import Protocol
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from regagent.application.retrieval.models import EmbeddingModelSpec
 from regagent.domain.retrieval import RetrievalHit, RetrievalQuery
 
 
@@ -27,7 +28,10 @@ class LLMResponse(BaseModel):
 
 class EmbeddingProvider(Protocol):
     @property
-    def model_name(self) -> str: ...
+    def model_spec(self) -> EmbeddingModelSpec: ...
+
+    @property
+    def dimensions(self) -> int: ...
 
     async def embed_documents(self, texts: Sequence[str]) -> list[list[float]]: ...
 

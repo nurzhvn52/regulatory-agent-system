@@ -20,8 +20,10 @@ by language, act type, jurisdiction, and effective date.
 
 ## Consequences
 
-- HNSW is the default approximate vector index.
-- Exact search remains available for recall checks on small evaluation corpora.
+- Exact cosine search is the default for the current small evaluation corpus, so the
+  retrieval baseline does not lose recall because of approximate indexing.
+- A model-specific partial HNSW index will be introduced when corpus size makes exact
+  search too slow; exact search remains the reference during index tuning.
 - The base embedding column accepts different dimensions. Model-specific partial HNSW
   indexes will be introduced with explicit casts after each experimental model is fixed.
 - The BM25 implementation is measured separately rather than conflated with PostgreSQL

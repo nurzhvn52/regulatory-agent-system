@@ -20,6 +20,14 @@ def test_embedding_column_allows_multiple_model_dimensions() -> None:
     assert embedding_type.dim is None
 
 
+def test_embeddings_record_reproducible_model_provenance() -> None:
+    embeddings = Base.metadata.tables["embeddings"]
+
+    assert "model_revision" in embeddings.c
+    assert "normalized" in embeddings.c
+    assert "embedding_config" in embeddings.c
+
+
 def test_chunks_record_strategy_and_multi_section_provenance() -> None:
     chunks = Base.metadata.tables["chunks"]
 

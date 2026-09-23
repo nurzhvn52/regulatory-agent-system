@@ -77,3 +77,32 @@ Running the same command again is idempotent: an unchanged content hash returns
 Supported inputs are HTML, DOCX, text-based PDF, and UTF-8 TXT. An image-only PDF fails
 with an explicit OCR-required error; OCR will be implemented as a separate adapter so it
 can be evaluated independently.
+
+## Index and search
+
+Retrieval always uses an explicit preprocessing snapshot. Copy the `pipeline_signature`
+returned by ingestion, then create BGE-M3 embeddings for the desired corpus:
+
+```powershell
+poetry run regagent index `
+  --pipeline-signature "<64-character-signature>" `
+  --chunking-strategy legal_structure `
+  --language ru `
+  --language kk
+```
+
+Run the lexical, dense, or hybrid baseline with the same scope:
+
+```powershell
+poetry run regagent search "кто проводит правовой мониторинг" `
+  --strategy hybrid `
+  --pipeline-signature "<64-character-signature>" `
+  --chunking-strategy legal_structure `
+  --language ru `
+  --top-k 5
+```
+
+The current research corpus uses exact cosine search. This preserves perfect vector
+recall while the corpus is small; HNSW will be added and measured separately when exact
+search becomes a bottleneck. Retrieval architecture and metric definitions are recorded
+in `docs/architecture/retrieval.md`.

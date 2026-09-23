@@ -6,6 +6,7 @@ from uuid import UUID, uuid4
 
 from pgvector.sqlalchemy import Vector
 from sqlalchemy import (
+    Boolean,
     CheckConstraint,
     Date,
     DateTime,
@@ -145,7 +146,12 @@ class ChunkRecord(Base):
 class EmbeddingRecord(Base):
     __tablename__ = "embeddings"
     __table_args__ = (
-        UniqueConstraint("chunk_id", "model_name", name="uq_embedding_chunk_model"),
+        UniqueConstraint(
+            "chunk_id",
+            "model_name",
+            "model_revision",
+            name="uq_embedding_chunk_model_revision",
+        ),
         CheckConstraint("dimensions > 0", name="ck_embedding_positive_dimensions"),
         Index("ix_embeddings_model", "model_name"),
     )
@@ -155,7 +161,10 @@ class EmbeddingRecord(Base):
         PGUUID(as_uuid=True), ForeignKey("chunks.id", ondelete="CASCADE")
     )
     model_name: Mapped[str] = mapped_column(String(300))
+    model_revision: Mapped[str] = mapped_column(String(200))
     dimensions: Mapped[int] = mapped_column(Integer)
+    normalized: Mapped[bool] = mapped_column(Boolean, default=True)
+    embedding_config: Mapped[dict[str, Any]] = mapped_column(JSONB, default=dict)
     embedding: Mapped[list[float]] = mapped_column(Vector())
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()

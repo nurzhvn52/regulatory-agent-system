@@ -22,6 +22,8 @@ beautifulsoup4 = ">=4.14,<5.0"
 lxml = ">=5.0,<7.0"
 python-docx = ">=1.2,<2.0"
 pymupdf = ">=1.27,<2.0"
+sentence-transformers = ">=5.1,<6.0"
+torch = { version = "2.14.0+cu130", source = "pytorch-cu130" }
 
 [tool.poetry.scripts]
 regagent = "regagent.cli:main"
@@ -37,6 +39,11 @@ types-pyyaml = ">=6.0,<7.0"
 [build-system]
 requires = ["poetry-core>=2.0,<3.0"]
 build-backend = "poetry.core.masonry.api"
+
+[[tool.poetry.source]]
+name = "pytorch-cu130"
+url = "https://download.pytorch.org/whl/cu130"
+priority = "explicit"
 
 [tool.pytest.ini_options]
 addopts = "-q"

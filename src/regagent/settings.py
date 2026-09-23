@@ -26,6 +26,10 @@ class Settings(BaseSettings):
         "postgresql+psycopg://regagent:regagent@localhost:55432/regagent"
     )
     embedding_model: str = "BAAI/bge-m3"
+    embedding_revision: str = "5617a9f61b028005a4858fdac845db406aefb181"
+    embedding_dimensions: int = 1024
+    embedding_device: str = "auto"
+    embedding_batch_size: int = 8
     llm_provider: str = "mock"
     llm_model: str | None = None
     llm_api_key: SecretStr | None = None

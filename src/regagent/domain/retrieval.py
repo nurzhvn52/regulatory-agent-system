@@ -19,6 +19,8 @@ class RetrievalStrategy(StrEnum):
 class RetrievalFilters(BaseModel):
     model_config = ConfigDict(frozen=True)
 
+    pipeline_signature: str = Field(min_length=64, max_length=64)
+    chunking_strategy: str = Field(default="legal_structure", min_length=1)
     languages: tuple[Language, ...] = ()
     act_types: tuple[ActType, ...] = ()
     effective_on: date | None = None
@@ -30,7 +32,7 @@ class RetrievalQuery(BaseModel):
 
     text: str = Field(min_length=1)
     top_k: int = Field(default=15, ge=1, le=100)
-    filters: RetrievalFilters = Field(default_factory=RetrievalFilters)
+    filters: RetrievalFilters
 
 
 class RetrievalHit(BaseModel):
@@ -44,5 +46,6 @@ class RetrievalHit(BaseModel):
     rank: int = Field(ge=1)
     article: str | None = None
     paragraph: str | None = None
+    title: str
+    language: Language
     source_url: str
-
