@@ -24,6 +24,9 @@ class CorpusChunk(BaseModel):
     paragraph: str | None = None
     source_url: str
     ordinal: int = Field(ge=0)
+    source_content_hash: str = ""
+    articles: tuple[str, ...] = ()
+    chunking_config: dict[str, Any] = Field(default_factory=dict)
 
     def to_hit(self, *, score: float, rank: int) -> RetrievalHit:
         return RetrievalHit(
@@ -46,6 +49,7 @@ class EmbeddingModelSpec(BaseModel):
 
     name: str = Field(min_length=1)
     revision: str = Field(min_length=1)
+    dimensions: int | None = Field(default=None, ge=1)
     normalized: bool = True
     config: dict[str, Any] = Field(default_factory=dict)
 

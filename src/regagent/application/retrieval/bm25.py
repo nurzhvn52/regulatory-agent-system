@@ -37,9 +37,7 @@ class BM25Index:
         self._b = b
         self._term_frequencies = tuple(Counter(tokenize(chunk.text)) for chunk in chunks)
         self._lengths = tuple(sum(frequencies.values()) for frequencies in self._term_frequencies)
-        self._average_length = (
-            sum(self._lengths) / len(self._lengths) if self._lengths else 0.0
-        )
+        self._average_length = sum(self._lengths) / len(self._lengths) if self._lengths else 0.0
         document_frequencies: dict[str, int] = defaultdict(int)
         for frequencies in self._term_frequencies:
             for term in frequencies:
@@ -64,7 +62,14 @@ class BM25Index:
             score = self._score(query_terms, frequencies, length)
             if score > 0:
                 scores.append((chunk, score))
-        scores.sort(key=lambda item: (-item[1], item[0].ordinal, str(item[0].chunk_id)))
+        scores.sort(
+            key=lambda item: (
+                -item[1],
+                item[0].source_url,
+                item[0].source_content_hash,
+                item[0].ordinal,
+            )
+        )
         return scores[:top_k]
 
     def _score(
@@ -79,9 +84,7 @@ class BM25Index:
             frequency = frequencies.get(term, 0)
             if frequency == 0:
                 continue
-            denominator = frequency + self._k1 * (
-                1 - self._b + self._b * length / average_length
-            )
+            denominator = frequency + self._k1 * (1 - self._b + self._b * length / average_length)
             score += self._idf.get(term, 0.0) * frequency * (self._k1 + 1) / denominator
         return score
 

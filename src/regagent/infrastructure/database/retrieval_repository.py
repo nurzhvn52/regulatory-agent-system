@@ -29,14 +29,38 @@ class SqlAlchemyRetrievalRepository:
         self._database = database
 
     async def list_chunks(self, filters: RetrievalFilters) -> list[CorpusChunk]:
-        statement = self._chunk_select().where(*self._scope_conditions(filters)).order_by(
-            DocumentRecord.id,
-            DocumentVersionRecord.id,
-            ChunkRecord.ordinal,
+        statement = (
+            self._chunk_select()
+            .where(*self._scope_conditions(filters))
+            .order_by(
+                DocumentRecord.id,
+                DocumentVersionRecord.id,
+                ChunkRecord.ordinal,
+            )
         )
         async with self._database.session() as session:
             rows = (await session.execute(statement)).all()
-        return [self._to_chunk(*row) for row in rows]
+            section_rows = (
+                await session.scalars(
+                    select(DocumentSectionRecord).where(
+                        DocumentSectionRecord.version_id.in_({row[0].version_id for row in rows}),
+                        DocumentSectionRecord.pipeline_signature == filters.pipeline_signature,
+                    )
+                )
+            ).all()
+        sections = {(s.version_id, str(s.id)): s.article for s in section_rows}
+        chunks = []
+        for row in rows:
+            chunk = row[0]
+            articles = tuple(
+                dict.fromkeys(
+                    article
+                    for section_id in chunk.source_section_ids
+                    if (article := sections.get((chunk.version_id, section_id))) is not None
+                )
+            )
+            chunks.append(self._to_chunk(*row).model_copy(update={"articles": articles}))
+        return chunks
 
     async def list_unembedded_chunks(
         self,
@@ -47,7 +71,11 @@ class SqlAlchemyRetrievalRepository:
             EmbeddingRecord.chunk_id == ChunkRecord.id,
             EmbeddingRecord.model_name == model.name,
             EmbeddingRecord.model_revision == model.revision,
+            EmbeddingRecord.normalized == model.normalized,
+            EmbeddingRecord.embedding_config == model.config,
         )
+        if model.dimensions is not None:
+            embedding_match = and_(embedding_match, EmbeddingRecord.dimensions == model.dimensions)
         statement = (
             self._chunk_select()
             .outerjoin(EmbeddingRecord, embedding_match)
@@ -66,6 +94,8 @@ class SqlAlchemyRetrievalRepository:
         if not embeddings:
             return 0
         dimensions = len(embeddings[0].values)
+        if model.dimensions is not None and dimensions != model.dimensions:
+            raise ValueError("Embedding dimensions do not match the model specification")
         if any(len(item.values) != dimensions for item in embeddings):
             raise ValueError("Cannot persist embeddings with mixed dimensions")
         values = [
@@ -83,9 +113,7 @@ class SqlAlchemyRetrievalRepository:
         statement = (
             insert(EmbeddingRecord)
             .values(values)
-            .on_conflict_do_nothing(
-                index_elements=["chunk_id", "model_name", "model_revision"]
-            )
+            .on_conflict_do_nothing(index_elements=["chunk_id", "model_name", "model_revision"])
             .returning(EmbeddingRecord.id)
         )
         async with self._database.session() as session, session.begin():
@@ -102,6 +130,8 @@ class SqlAlchemyRetrievalRepository:
         if not query_vector:
             raise ValueError("Query embedding cannot be empty")
         dimensions = len(query_vector)
+        if model.dimensions is not None and dimensions != model.dimensions:
+            raise ValueError("Query dimensions do not match the model specification")
         distance = cast(EmbeddingRecord.embedding, Vector(dimensions)).cosine_distance(
             list(query_vector)
         )
@@ -113,8 +143,15 @@ class SqlAlchemyRetrievalRepository:
                 EmbeddingRecord.model_name == model.name,
                 EmbeddingRecord.model_revision == model.revision,
                 EmbeddingRecord.dimensions == dimensions,
+                EmbeddingRecord.normalized == model.normalized,
+                EmbeddingRecord.embedding_config == model.config,
             )
-            .order_by(distance, ChunkRecord.id)
+            .order_by(
+                distance,
+                DocumentVersionRecord.source_url,
+                DocumentVersionRecord.content_hash,
+                ChunkRecord.ordinal,
+            )
             .limit(top_k)
         )
         async with self._database.session() as session:
@@ -168,6 +205,8 @@ class SqlAlchemyRetrievalRepository:
             )
         if filters.document_ids:
             conditions.append(DocumentRecord.id.in_(filters.document_ids))
+        if filters.version_ids:
+            conditions.append(DocumentVersionRecord.id.in_(filters.version_ids))
         if filters.effective_on:
             conditions.extend(
                 [
@@ -202,4 +241,6 @@ class SqlAlchemyRetrievalRepository:
             paragraph=section.paragraph,
             source_url=version.source_url,
             ordinal=chunk.ordinal,
+            source_content_hash=version.content_hash,
+            chunking_config=chunk.chunking_config,
         )

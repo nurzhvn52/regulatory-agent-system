@@ -1,0 +1,496 @@
+schema_version: '1'
+dataset_id: legal-acts-ru-kk-pilot-v1
+description: >-
+  AI-authored draft: 30 paired Russian/Kazakh questions about the locally pinned
+  Law on Legal Acts. Coarse article-overlap relevance; requires human legal and
+  Kazakh-language review. Pilot development set, not an independent test set.
+sources:
+  - source_id: legal-acts-ru
+    language: ru
+    source_url: https://old.adilet.zan.kz/rus/docs/Z1600000480
+    content_hash: 4c73b6277d0c503395c69b00a0ec455acc99f876ee4d0ff6cffd02b85ccd5322
+  - source_id: legal-acts-kk
+    language: kk
+    source_url: https://old.adilet.zan.kz/kaz/docs/Z1600000480
+    content_hash: e2b9c8f4ab124865a7480c123a137e0ab5933f852da737a1e4771f08dcd65564
+cases:
+  - case_id: legal-acts-01-ru
+    pair_id: legal-acts-01
+    language: ru
+    query: "Какие отношения исключены из сферы действия закона о правовых актах?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-ru
+        article: '2'
+  - case_id: legal-acts-01-kk
+    pair_id: legal-acts-01
+    language: kk
+    query: "Құқықтық актілер туралы заңның қолданылу аясына қандай қатынастар кірмейді?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-kk
+        article: '2'
+  - case_id: legal-acts-02-ru
+    pair_id: legal-acts-02
+    language: ru
+    query: "Какие формы относятся к производным нормативным правовым актам?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-ru
+        article: '7'
+  - case_id: legal-acts-02-kk
+    pair_id: legal-acts-02
+    language: kk
+    query: "Нормативтік құқықтық актілердің туынды түрлеріне қандай нысандар жатады?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-kk
+        article: '7'
+  - case_id: legal-acts-03-ru
+    pair_id: legal-acts-03
+    language: ru
+    query: "Как соотносятся по юридической силе кодекс, закон и постановление Правительства?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-ru
+        article: '10'
+  - case_id: legal-acts-03-kk
+    pair_id: legal-acts-03
+    language: kk
+    query: "Кодекс, заң және Үкімет қаулысының заңдық күші қалай арақатынасады?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-kk
+        article: '10'
+  - case_id: legal-acts-04-ru
+    pair_id: legal-acts-04
+    language: ru
+    query: "Нужны ли дополнительные указания для применения уже введённого в действие нормативного акта?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-ru
+        article: '11'
+  - case_id: legal-acts-04-kk
+    pair_id: legal-acts-04
+    language: kk
+    query: "Қолданысқа енгізілген нормативтік актіні қолдану үшін қосымша нұсқаулар қажет пе?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-kk
+        article: '11'
+  - case_id: legal-acts-05-ru
+    pair_id: legal-acts-05
+    language: ru
+    query: "Два нормативных акта одного уровня противоречат друг другу. Какую норму следует применять?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-ru
+        article: '12'
+  - case_id: legal-acts-05-kk
+    pair_id: legal-acts-05
+    language: kk
+    query: "Бір деңгейдегі екі нормативтік акт бір-біріне қайшы келсе, қай норманы қолдану керек?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-kk
+        article: '12'
+  - case_id: legal-acts-06-ru
+    pair_id: legal-acts-06
+    language: ru
+    query: "Можно ли с помощью аналогии закона вводить новые обязанности для граждан?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-ru
+        article: '13'
+  - case_id: legal-acts-06-kk
+    pair_id: legal-acts-06
+    language: kk
+    query: "Заң ұқсастығын пайдаланып азаматтарға жаңа міндеттер жүктеуге бола ма?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-kk
+        article: '13'
+  - case_id: legal-acts-07-ru
+    pair_id: legal-acts-07
+    language: ru
+    query: "Как исчисляется срок, если в последнем месяце нет соответствующего числа?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-ru
+        article: '14'
+  - case_id: legal-acts-07-kk
+    pair_id: legal-acts-07
+    language: kk
+    query: "Мерзімнің соңғы айында тиісті күн болмаған жағдайда мерзім қалай есептеледі?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-kk
+        article: '14'
+  - case_id: legal-acts-08-ru
+    pair_id: legal-acts-08
+    language: ru
+    query: "Кто разрабатывает проекты законов по законодательной инициативе Правительства?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-ru
+        article: '17'
+  - case_id: legal-acts-08-kk
+    pair_id: legal-acts-08
+    language: kk
+    query: "Үкіметтің заң шығару бастамасы бойынша заң жобаларын кім әзірлейді?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-kk
+        article: '17'
+  - case_id: legal-acts-09-ru
+    pair_id: legal-acts-09
+    language: ru
+    query: "Как общественные советы участвуют в обсуждении проектов актов, касающихся прав граждан?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-ru
+        article: '20'
+  - case_id: legal-acts-09-kk
+    pair_id: legal-acts-09
+    language: kk
+    query: "Азаматтардың құқықтарына қатысты актілердің жобаларын талқылауға қоғамдық кеңестер қалай қатысады?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-kk
+        article: '20'
+  - case_id: legal-acts-10-ru
+    pair_id: legal-acts-10
+    language: ru
+    query: "Какие обязательные реквизиты должен содержать нормативный правовой акт?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-ru
+        article: '22'
+  - case_id: legal-acts-10-kk
+    pair_id: legal-acts-10
+    language: kk
+    query: "Нормативтік құқықтық актіде қандай міндетті деректемелер болуы керек?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-kk
+        article: '22'
+  - case_id: legal-acts-11-ru
+    pair_id: legal-acts-11
+    language: ru
+    query: "Из каких структурных элементов может состоять статья закона?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-ru
+        article: '23'
+  - case_id: legal-acts-11-kk
+    pair_id: legal-acts-11
+    language: kk
+    query: "Заңның бабы қандай құрылымдық элементтерден тұруы мүмкін?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-kk
+        article: '23'
+  - case_id: legal-acts-12-ru
+    pair_id: legal-acts-12
+    language: ru
+    query: "Может ли подзаконный акт устанавливать норму за пределами того, что предусмотрено законом?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-ru
+        article: '24'
+  - case_id: legal-acts-12-kk
+    pair_id: legal-acts-12
+    language: kk
+    query: "Заңға тәуелді акт заңда белгіленген нормалардың шегінен шығатын норма белгілей ала ма?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-kk
+        article: '24'
+  - case_id: legal-acts-13-ru
+    pair_id: legal-acts-13
+    language: ru
+    query: "В каком порядке указывают сведения об акте при ссылке на него в другом нормативном акте?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-ru
+        article: '25'
+  - case_id: legal-acts-13-kk
+    pair_id: legal-acts-13
+    language: kk
+    query: "Басқа нормативтік актіде актіге сілтеме жасағанда оның мәліметтері қандай ретпен көрсетіледі?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-kk
+        article: '25'
+  - case_id: legal-acts-14-ru
+    pair_id: legal-acts-14
+    language: ru
+    query: "Как оформляется единственное приложение к нормативному правовому акту и нужно ли его нумеровать?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-ru
+        article: '28'
+  - case_id: legal-acts-14-kk
+    pair_id: legal-acts-14
+    language: kk
+    query: "Нормативтік құқықтық актінің жалғыз қосымшасы қалай ресімделеді және оны нөмірлеу қажет пе?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-kk
+        article: '28'
+  - case_id: legal-acts-15-ru
+    pair_id: legal-acts-15
+    language: ru
+    query: "Для каких целей проводится научная экспертиза проекта нормативного правового акта?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-ru
+        article: '30'
+  - case_id: legal-acts-15-kk
+    pair_id: legal-acts-15
+    language: kk
+    query: "Нормативтік құқықтық актінің жобасына ғылыми сараптама қандай мақсаттарда жүргізіледі?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-kk
+        article: '30'
+  - case_id: legal-acts-16-ru
+    pair_id: legal-acts-16
+    language: ru
+    query: "Что указано в загруженной редакции закона о статусе статьи о научной лингвистической экспертизе?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-ru
+        article: '33'
+  - case_id: legal-acts-16-kk
+    pair_id: legal-acts-16
+    language: kk
+    query: "Заңның жүктелген редакциясында ғылыми лингвистикалық сараптама туралы баптың мәртебесі жөнінде не көрсетілген?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-kk
+        article: '33'
+  - case_id: legal-acts-17-ru
+    pair_id: legal-acts-17
+    language: ru
+    query: "Кто уполномочен подписывать законы и постановления Правительства?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-ru
+        article: '35'
+  - case_id: legal-acts-17-kk
+    pair_id: legal-acts-17
+    language: kk
+    query: "Заңдарға және Үкімет қаулыларына қол қоюға кім уәкілетті?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-kk
+        article: '35'
+  - case_id: legal-acts-18-ru
+    pair_id: legal-acts-18
+    language: ru
+    query: "На каких языках должно одновременно осуществляться первое официальное опубликование нормативного акта?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-ru
+        article: '37'
+  - case_id: legal-acts-18-kk
+    pair_id: legal-acts-18
+    language: kk
+    query: "Нормативтік актіні алғаш ресми жариялау бір мезгілде қай тілдерде жүзеге асырылуы керек?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-kk
+        article: '37'
+  - case_id: legal-acts-19-ru
+    pair_id: legal-acts-19
+    language: ru
+    query: "Как определить день официального опубликования, если большой акт напечатан в нескольких номерах издания?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-ru
+        article: '40'
+  - case_id: legal-acts-19-kk
+    pair_id: legal-acts-19
+    language: kk
+    query: "Көлемді акт басылымның бірнеше санында жарияланса, ресми жарияланған күн қалай анықталады?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-kk
+        article: '40'
+  - case_id: legal-acts-20-ru
+    pair_id: legal-acts-20
+    language: ru
+    query: "Когда вступает в силу нормативный акт, подлежащий государственной регистрации в органах юстиции?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-ru
+        article: '42'
+  - case_id: legal-acts-20-kk
+    pair_id: legal-acts-20
+    language: kk
+    query: "Әділет органдарында мемлекеттік тіркелуге жататын нормативтік акт қашан күшіне енеді?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-kk
+        article: '42'
+  - case_id: legal-acts-21-ru
+    pair_id: legal-acts-21
+    language: ru
+    query: "Имеет ли обратную силу закон, который усиливает ответственность или возлагает новые обязанности?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-ru
+        article: '43'
+  - case_id: legal-acts-21-kk
+    pair_id: legal-acts-21
+    language: kk
+    query: "Жауаптылықты күшейтетін немесе жаңа міндеттер жүктейтін заңның кері күші бар ма?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-kk
+        article: '43'
+  - case_id: legal-acts-22-ru
+    pair_id: legal-acts-22
+    language: ru
+    query: "Как долго действует нормативный акт, если срок действия в нём не указан?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-ru
+        article: '45'
+  - case_id: legal-acts-22-kk
+    pair_id: legal-acts-22
+    language: kk
+    query: "Нормативтік актіде қолданылу мерзімі көрсетілмесе, ол қанша уақыт қолданылады?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-kk
+        article: '45'
+  - case_id: legal-acts-23-ru
+    pair_id: legal-acts-23
+    language: ru
+    query: "По каким основаниям нормативный правовой акт прекращает действие?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-ru
+        article: '46'
+  - case_id: legal-acts-23-kk
+    pair_id: legal-acts-23
+    language: kk
+    query: "Нормативтік құқықтық акт қандай негіздер бойынша қолданылуын тоқтатады?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-kk
+        article: '46'
+  - case_id: legal-acts-24-ru
+    pair_id: legal-acts-24
+    language: ru
+    query: "На какой территории действуют нормативные акты местных представительных и исполнительных органов?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-ru
+        article: '47'
+  - case_id: legal-acts-24-kk
+    pair_id: legal-acts-24
+    language: kk
+    query: "Жергілікті өкілді және атқарушы органдардың нормативтік актілері қай аумақта қолданылады?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-kk
+        article: '47'
+  - case_id: legal-acts-25-ru
+    pair_id: legal-acts-25
+    language: ru
+    query: "Распространяются ли нормативные акты Казахстана на иностранцев и лиц без гражданства?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-ru
+        article: '48'
+  - case_id: legal-acts-25-kk
+    pair_id: legal-acts-25
+    language: kk
+    query: "Қазақстанның нормативтік актілері шетелдіктер мен азаматтығы жоқ адамдарға қолданыла ма?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-kk
+        article: '48'
+  - case_id: legal-acts-26-ru
+    pair_id: legal-acts-26
+    language: ru
+    query: "Кто проводит правовой мониторинг принятых государственными органами актов и какие недостатки он выявляет?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-ru
+        article: '50'
+  - case_id: legal-acts-26-kk
+    pair_id: legal-acts-26
+    language: kk
+    query: "Мемлекеттік органдар қабылдаған актілерге құқықтық мониторингті кім жүргізеді және ол қандай кемшіліктерді анықтайды?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-kk
+        article: '50'
+  - case_id: legal-acts-27-ru
+    pair_id: legal-acts-27
+    language: ru
+    query: "Кто проводит общественный мониторинг актов, затрагивающих интересы частного предпринимательства?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-ru
+        article: '51'
+  - case_id: legal-acts-27-kk
+    pair_id: legal-acts-27
+    language: kk
+    query: "Жеке кәсіпкерлік мүдделерін қозғайтын актілерге қоғамдық мониторингті кім жүргізеді?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-kk
+        article: '51'
+  - case_id: legal-acts-28-ru
+    pair_id: legal-acts-28
+    language: ru
+    query: "Какие информационные ресурсы ведутся для государственного учёта нормативных правовых актов?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-ru
+        article: '53'
+  - case_id: legal-acts-28-kk
+    pair_id: legal-acts-28
+    language: kk
+    query: "Нормативтік құқықтық актілерді мемлекеттік есепке алу үшін қандай ақпараттық ресурстар жүргізіледі?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-kk
+        article: '53'
+  - case_id: legal-acts-29-ru
+    pair_id: legal-acts-29
+    language: ru
+    query: "Каким требованиям должно соответствовать официальное разъяснение норм закона?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-ru
+        article: '59'
+  - case_id: legal-acts-29-kk
+    pair_id: legal-acts-29
+    language: kk
+    query: "Заң нормаларына ресми түсіндірме беру қандай талаптарға сәйкес келуі керек?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-kk
+        article: '59'
+  - case_id: legal-acts-30-ru
+    pair_id: legal-acts-30
+    language: ru
+    query: "Имеет ли обязательную юридическую силу разъяснение государственного органа по обращению конкретного лица?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-ru
+        article: '60'
+  - case_id: legal-acts-30-kk
+    pair_id: legal-acts-30
+    language: kk
+    query: "Нақты тұлғаның өтініші бойынша мемлекеттік орган берген түсіндірменің міндетті заңдық күші бар ма?"
+    review_status: draft
+    relevant_articles:
+      - source_id: legal-acts-kk
+        article: '60'

@@ -2,6 +2,7 @@
 
 import argparse
 import asyncio
+import json
 import sys
 from datetime import date
 from pathlib import Path
@@ -20,6 +21,7 @@ from regagent.application.retrieval.services import (
 )
 from regagent.domain.documents import ActType, Language
 from regagent.domain.retrieval import RetrievalFilters, RetrievalQuery, RetrievalStrategy
+from regagent.infrastructure.benchmark_runner import run_benchmark
 from regagent.infrastructure.database.repositories import SqlAlchemyDocumentRepository
 from regagent.infrastructure.database.retrieval_repository import (
     SqlAlchemyRetrievalRepository,
@@ -76,6 +78,19 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     search.add_argument("--top-k", type=int, default=10)
     _add_corpus_arguments(search)
+    evaluate = subparsers.add_parser("evaluate", help="Compare retrieval on a pinned benchmark")
+    evaluate.add_argument("dataset", type=Path)
+    evaluate.add_argument("--output-dir", type=Path, required=True)
+    evaluate.add_argument("--pipeline-signature", required=True)
+    evaluate.add_argument("--chunking-strategy", default="legal_structure")
+    evaluate.add_argument("--allow-draft", action="store_true")
+    evaluate.add_argument(
+        "--strategies",
+        nargs="+",
+        choices=("bm25", "dense", "hybrid"),
+        default=["bm25", "dense", "hybrid"],
+    )
+    evaluate.add_argument("--k", type=int, nargs="+", default=[1, 3, 5, 10])
     return parser
 
 
@@ -182,16 +197,37 @@ async def _search(arguments: argparse.Namespace) -> None:
                 filters=_retrieval_filters(arguments),
             )
         )
-        print(
-            "[\n"
-            + ",\n".join(hit.model_dump_json(indent=2) for hit in hits)
-            + "\n]"
+        print("[\n" + ",\n".join(hit.model_dump_json(indent=2) for hit in hits) + "\n]")
+    finally:
+        await database.dispose()
+
+
+async def _evaluate(arguments: argparse.Namespace) -> None:
+    database = Database(get_settings())
+    try:
+        result = await run_benchmark(
+            arguments.dataset,
+            arguments.output_dir,
+            RetrievalFilters(
+                pipeline_signature=arguments.pipeline_signature,
+                chunking_strategy=arguments.chunking_strategy,
+            ),
+            SqlAlchemyRetrievalRepository(database),
+            _embedding_provider(),
+            strategies=tuple(arguments.strategies),
+            k_values=tuple(sorted(set(arguments.k))),
+            allow_draft=arguments.allow_draft,
         )
+        print(json.dumps(result, ensure_ascii=False, indent=2))
     finally:
         await database.dispose()
 
 
 def main() -> None:
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
+    if hasattr(sys.stderr, "reconfigure"):
+        sys.stderr.reconfigure(encoding="utf-8")
     arguments = _build_parser().parse_args()
     if sys.platform == "win32":
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
@@ -201,6 +237,11 @@ def main() -> None:
         asyncio.run(_index(arguments))
     elif arguments.command == "search":
         asyncio.run(_search(arguments))
+    elif arguments.command == "evaluate":
+        try:
+            asyncio.run(_evaluate(arguments))
+        except (ValueError, FileNotFoundError) as error:
+            raise SystemExit(f"Evaluation failed: {error}") from error
 
 
 if __name__ == "__main__":

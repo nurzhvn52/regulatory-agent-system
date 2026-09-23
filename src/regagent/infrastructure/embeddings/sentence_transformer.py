@@ -53,6 +53,7 @@ class SentenceTransformerEmbeddingProvider:
         return EmbeddingModelSpec(
             name=self._model_name,
             revision=self._revision,
+            dimensions=self._dimensions,
             normalized=True,
             config={
                 "backend": "sentence-transformers",

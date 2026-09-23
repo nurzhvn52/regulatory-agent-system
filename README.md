@@ -106,3 +106,23 @@ The current research corpus uses exact cosine search. This preserves perfect vec
 recall while the corpus is small; HNSW will be added and measured separately when exact
 search becomes a bottleneck. Retrieval architecture and metric definitions are recorded
 in `docs/architecture/retrieval.md`.
+
+## Evaluate retrieval
+
+A pilot dataset contains 60 AI-authored, unreviewed questions (30 RU/KK pairs).
+Run all three baselines on the same pinned corpus:
+
+```powershell
+poetry run regagent evaluate data/evaluation/drafts/legal_acts_ru_kk.yaml `
+  --pipeline-signature 8cc110d69566d224ebebde20f022187eb19cead5992ced909fcb088ed697a88d `
+  --allow-draft `
+  --output-dir artifacts/my-pilot-run
+```
+
+The new output directory contains JSON results, a CSV summary by language, provenance,
+and a `review.md` packet with questions and source evidence. Draft labels are refused
+unless `--allow-draft` is supplied. These pilot measurements are not dissertation
+findings until the relevance labels and experimental design have been reviewed.
+
+See [evaluation guide](docs/architecture/evaluation.md) for metric definitions,
+review workflow, version pinning, and limitations of article-overlap labels.

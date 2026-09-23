@@ -42,4 +42,7 @@ because they are on incompatible scales.
 
 `RetrievalEvaluator` computes binary-relevance Recall@k, reciprocal rank, and nDCG@k.
 Benchmark relevance labels must be reviewed manually and stored under
-`data/evaluation/`; generated candidates are not treated as ground truth.
+`data/evaluation/reviewed/`. Version-controlled candidates in `data/evaluation/drafts/`
+require explicit `--allow-draft` for pilot runs and are not treated as expert ground truth.
+The command `regagent evaluate` produces per-query and language-level reports;
+see [evaluation guide](evaluation.md) for the complete protocol.

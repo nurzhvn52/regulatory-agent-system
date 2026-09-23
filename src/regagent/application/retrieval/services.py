@@ -42,7 +42,13 @@ class EmbeddingIndexService:
                 if not vector or len(vector) != dimensions:
                     raise ValueError("Embedding provider returned inconsistent dimensions")
                 vectors.append(EmbeddingVector(chunk_id=chunk.chunk_id, values=vector))
-            indexed += await self._repository.store_embeddings(model, vectors)
+            inserted = await self._repository.store_embeddings(model, vectors)
+            if inserted != len(vectors):
+                raise ValueError(
+                    "Embedding identity conflicts with an existing configuration; "
+                    "choose a new model revision"
+                )
+            indexed += inserted
         return IndexingResult(
             model=model,
             dimensions=dimensions or self._provider.dimensions,
@@ -119,7 +125,10 @@ def reciprocal_rank_fusion(
             seen.add(hit.chunk_id)
             scores[hit.chunk_id] += 1.0 / (rank_constant + position)
             hits.setdefault(hit.chunk_id, hit)
-    ordered_ids = sorted(scores, key=lambda chunk_id: (-scores[chunk_id], str(chunk_id)))
+    ordered_ids = sorted(
+        scores,
+        key=lambda chunk_id: (-scores[chunk_id], hits[chunk_id].source_url, hits[chunk_id].text),
+    )
     return [
         hits[chunk_id].model_copy(update={"score": scores[chunk_id], "rank": rank})
         for rank, chunk_id in enumerate(ordered_ids[:top_k], start=1)

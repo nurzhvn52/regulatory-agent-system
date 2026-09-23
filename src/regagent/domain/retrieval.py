@@ -25,6 +25,7 @@ class RetrievalFilters(BaseModel):
     act_types: tuple[ActType, ...] = ()
     effective_on: date | None = None
     document_ids: tuple[UUID, ...] = ()
+    version_ids: tuple[UUID, ...] = ()
 
 
 class RetrievalQuery(BaseModel):

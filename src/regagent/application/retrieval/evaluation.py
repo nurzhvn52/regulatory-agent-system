@@ -22,13 +22,13 @@ def evaluate_ranking(
     k_values: Sequence[int] = (1, 3, 5, 10),
 ) -> RetrievalMetrics:
     relevant = frozenset(relevant_ids)
+    if len(set(retrieved_ids)) != len(retrieved_ids):
+        raise ValueError("Duplicate retrieved chunks would inflate ranking metrics")
     if not relevant:
         raise ValueError("At least one relevant chunk is required")
     if not k_values or any(value < 1 for value in k_values):
         raise ValueError("k_values must contain positive integers")
-    recall = {
-        k: len(relevant.intersection(retrieved_ids[:k])) / len(relevant) for k in k_values
-    }
+    recall = {k: len(relevant.intersection(retrieved_ids[:k])) / len(relevant) for k in k_values}
     reciprocal_rank = next(
         (
             1.0 / rank
@@ -63,6 +63,8 @@ class RetrievalEvaluator:
         *,
         k_values: Sequence[int] = (1, 3, 5, 10),
     ) -> None:
+        if not k_values or any(k < 1 or k > 100 for k in k_values):
+            raise ValueError("k_values must contain integers between 1 and 100")
         self._retriever = retriever
         self._k_values = tuple(k_values)
 
@@ -70,6 +72,8 @@ class RetrievalEvaluator:
         self,
         cases: Sequence[RetrievalEvaluationCase],
     ) -> AggregateEvaluation:
+        if not cases:
+            raise ValueError("Evaluation requires at least one case")
         results: list[EvaluationResult] = []
         max_k = max(self._k_values)
         for case in cases:
@@ -90,12 +94,9 @@ class RetrievalEvaluator:
                 k: _mean(result.metrics.recall_at_k[k] for result in results)
                 for k in self._k_values
             },
-            mean_reciprocal_rank=_mean(
-                result.metrics.reciprocal_rank for result in results
-            ),
+            mean_reciprocal_rank=_mean(result.metrics.reciprocal_rank for result in results),
             mean_ndcg_at_k={
-                k: _mean(result.metrics.ndcg_at_k[k] for result in results)
-                for k in self._k_values
+                k: _mean(result.metrics.ndcg_at_k[k] for result in results) for k in self._k_values
             },
             cases=tuple(results),
         )
