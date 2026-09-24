@@ -210,10 +210,8 @@ class SqlAlchemyRetrievalRepository:
         if filters.effective_on:
             conditions.extend(
                 [
-                    or_(
-                        DocumentVersionRecord.effective_from.is_(None),
-                        DocumentVersionRecord.effective_from <= filters.effective_on,
-                    ),
+                    DocumentVersionRecord.effective_from.is_not(None),
+                    DocumentVersionRecord.effective_from <= filters.effective_on,
                     or_(
                         DocumentVersionRecord.effective_to.is_(None),
                         DocumentVersionRecord.effective_to >= filters.effective_on,

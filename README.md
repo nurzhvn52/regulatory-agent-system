@@ -46,7 +46,11 @@ poetry run pytest
 
 - `GET /health` reports application status.
 - `POST /v1/agent-plans/compile` compiles a declarative `AgentSpec` into a deterministic
-  workflow plan. A LangGraph runtime adapter will execute these plans in a later stage.
+  workflow plan. The first cited-QA plan can now be executed from the CLI; other task
+  plans and reranking remain research work.
+
+See [cited QA runtime](docs/architecture/cited-qa-runtime.md) for local LLM setup,
+version pinning, citation checks, and known limitations.
 
 Architecture decisions are recorded under `docs/adr` so that implementation choices can
 be cited and reproduced in the dissertation.

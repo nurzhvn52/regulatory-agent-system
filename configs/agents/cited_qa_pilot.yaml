@@ -1,0 +1,18 @@
+name: cited-qa-pilot-ru-kk
+task_type: cited_qa
+languages:
+  - ru
+  - kk
+retrieval_strategy: hybrid
+top_k: 5
+reranker_enabled: false
+tools:
+  - document_search
+  - read_section
+  - verify_citations
+verification:
+  citations_required: true
+  entailment_check: true
+  refuse_without_evidence: true
+  require_effective_version: false
+output_schema: cited_answer_v1

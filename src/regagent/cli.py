@@ -9,6 +9,8 @@ from pathlib import Path
 from typing import Any
 from uuid import UUID
 
+from regagent.application.agent_generation.runtime import CitedQAAgent
+from regagent.application.config import load_agent_spec
 from regagent.application.ingestion.chunking import FixedWindowChunker, LegalStructureChunker
 from regagent.application.ingestion.models import IngestionRequest
 from regagent.application.ingestion.service import IngestionService
@@ -22,12 +24,14 @@ from regagent.application.retrieval.services import (
 from regagent.domain.documents import ActType, Language
 from regagent.domain.retrieval import RetrievalFilters, RetrievalQuery, RetrievalStrategy
 from regagent.infrastructure.benchmark_runner import run_benchmark
+from regagent.infrastructure.database.agent_runs import SqlAlchemyAgentRunRepository
 from regagent.infrastructure.database.repositories import SqlAlchemyDocumentRepository
 from regagent.infrastructure.database.retrieval_repository import (
     SqlAlchemyRetrievalRepository,
 )
 from regagent.infrastructure.database.session import Database
 from regagent.infrastructure.embeddings import SentenceTransformerEmbeddingProvider
+from regagent.infrastructure.llm import OpenAICompatibleLLM
 from regagent.infrastructure.parsers import ParserRegistry
 from regagent.settings import get_settings
 
@@ -78,6 +82,11 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     search.add_argument("--top-k", type=int, default=10)
     _add_corpus_arguments(search)
+    answer = subparsers.add_parser("answer", help="Run a cited QA agent and persist its trace")
+    answer.add_argument("question")
+    answer.add_argument("--spec", type=Path, default=Path("configs/agents/cited_qa_mvp.yaml"))
+    answer.add_argument("--experiment-id")
+    _add_corpus_arguments(answer)
     evaluate = subparsers.add_parser("evaluate", help="Compare retrieval on a pinned benchmark")
     evaluate.add_argument("dataset", type=Path)
     evaluate.add_argument("--output-dir", type=Path, required=True)
@@ -100,6 +109,7 @@ def _add_corpus_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--language", type=Language, action="append")
     parser.add_argument("--act-type", type=ActType, action="append")
     parser.add_argument("--document-id", type=UUID, action="append")
+    parser.add_argument("--version-id", type=UUID, action="append")
     parser.add_argument("--effective-on", type=_iso_date)
 
 
@@ -144,6 +154,7 @@ def _retrieval_filters(arguments: argparse.Namespace) -> RetrievalFilters:
         languages=tuple(arguments.language or ()),
         act_types=tuple(arguments.act_type or ()),
         document_ids=tuple(arguments.document_id or ()),
+        version_ids=tuple(arguments.version_id or ()),
         effective_on=arguments.effective_on,
     )
 
@@ -157,6 +168,66 @@ def _embedding_provider() -> SentenceTransformerEmbeddingProvider:
         device=settings.embedding_device,
         batch_size=settings.embedding_batch_size,
     )
+
+
+def _llm_provider() -> OpenAICompatibleLLM:
+    settings = get_settings()
+    if settings.llm_provider != "openai_compatible":
+        raise ValueError("Set REGAGENT_LLM_PROVIDER=openai_compatible for agent execution")
+    if not settings.llm_model or not settings.llm_base_url:
+        raise ValueError("Set REGAGENT_LLM_MODEL and REGAGENT_LLM_BASE_URL")
+    return OpenAICompatibleLLM(
+        model=settings.llm_model,
+        base_url=settings.llm_base_url,
+        api_key=settings.llm_api_key.get_secret_value() if settings.llm_api_key else None,
+    )
+
+
+async def _answer(arguments: argparse.Namespace) -> None:
+    settings = get_settings()
+    spec = load_agent_spec(arguments.spec)
+    filters = _retrieval_filters(arguments)
+    if not filters.languages:
+        filters = filters.model_copy(update={"languages": spec.languages})
+    llm = _llm_provider()
+    database = Database(settings)
+    runs = SqlAlchemyAgentRunRepository(database)
+    repository = SqlAlchemyRetrievalRepository(database)
+    lexical = BM25Retriever(repository)
+    try:
+        # Validate the plan and date scope before recording an attempted run.
+        if spec.reranker_enabled or spec.retrieval_strategy is RetrievalStrategy.HYBRID_RERANK:
+            raise ValueError("The cited QA runtime does not yet support reranking")
+        if spec.verification.require_effective_version and filters.effective_on is None:
+            raise ValueError("This agent requires --effective-on YYYY-MM-DD")
+        if not filters.version_ids:
+            raise ValueError("This agent requires at least one --version-id UUID")
+        if spec.retrieval_strategy is RetrievalStrategy.BM25:
+            retriever: Retriever = lexical
+        else:
+            dense = DenseRetriever(repository, _embedding_provider())
+            retriever = (
+                dense
+                if spec.retrieval_strategy is RetrievalStrategy.DENSE
+                else ReciprocalRankFusionRetriever((lexical, dense))
+            )
+        agent = CitedQAAgent(retriever, llm)
+        run_id = await runs.start(spec, arguments.question, filters, arguments.experiment_id)
+        try:
+            result = await agent.answer(spec, arguments.question, filters)
+            await runs.finish(run_id, result)
+        except Exception as error:
+            await runs.fail(run_id, error)
+            raise
+        print(
+            json.dumps(
+                {"run_id": str(run_id), **result.model_dump(mode="json")},
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+    finally:
+        await database.dispose()
 
 
 async def _index(arguments: argparse.Namespace) -> None:
@@ -242,6 +313,11 @@ def main() -> None:
             asyncio.run(_evaluate(arguments))
         except (ValueError, FileNotFoundError) as error:
             raise SystemExit(f"Evaluation failed: {error}") from error
+    elif arguments.command == "answer":
+        try:
+            asyncio.run(_answer(arguments))
+        except (ValueError, FileNotFoundError) as error:
+            raise SystemExit(f"Agent failed: {error}") from error
 
 
 if __name__ == "__main__":
