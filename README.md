@@ -130,3 +130,12 @@ findings until the relevance labels and experimental design have been reviewed.
 
 See [evaluation guide](docs/architecture/evaluation.md) for metric definitions,
 review workflow, version pinning, and limitations of article-overlap labels.
+
+## Evaluate cited QA end to end
+
+`regagent evaluate-agent` runs the pinned RU/KK questions through retrieval,
+generation, citation verification, and refusal handling. It writes durable
+per-case traces and a human-review worksheet, but leaves legal answer accuracy
+ungraded until independent review. See the [agent evaluation guide](docs/architecture/agent-evaluation.md).
+The [full 60-case technical pilot](docs/research/agent-pilot-2026-09-24.md)
+records the first end-to-end baseline and its limitations.

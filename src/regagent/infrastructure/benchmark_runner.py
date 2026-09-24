@@ -27,7 +27,7 @@ from regagent.application.retrieval.services import DenseRetriever, ReciprocalRa
 from regagent.domain.retrieval import RetrievalFilters, RetrievalHit, RetrievalQuery
 
 
-class _SnapshotBM25:
+class SnapshotBM25Retriever:
     def __init__(self, resolved: ResolvedBenchmark) -> None:
         self._indexes = {
             filters: BM25Index(
@@ -78,7 +78,7 @@ async def run_benchmark(
             missing = await repository.list_unembedded_chunks(filters, provider.model_spec)
             if missing:
                 raise ValueError(f"Dense index incomplete: {len(missing)} missing chunks")
-    lexical = _SnapshotBM25(resolved)
+    lexical = SnapshotBM25Retriever(resolved)
     dense = DenseRetriever(repository, provider)
     retrievers: dict[str, Retriever] = {
         "bm25": lexical,

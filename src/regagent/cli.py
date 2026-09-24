@@ -23,6 +23,8 @@ from regagent.application.retrieval.services import (
 )
 from regagent.domain.documents import ActType, Language
 from regagent.domain.retrieval import RetrievalFilters, RetrievalQuery, RetrievalStrategy
+from regagent.infrastructure.agent_evaluation_runner import run_agent_evaluation
+from regagent.infrastructure.agent_review_scoring import score_agent_review
 from regagent.infrastructure.benchmark_runner import run_benchmark
 from regagent.infrastructure.database.agent_runs import SqlAlchemyAgentRunRepository
 from regagent.infrastructure.database.repositories import SqlAlchemyDocumentRepository
@@ -100,6 +102,25 @@ def _build_parser() -> argparse.ArgumentParser:
         default=["bm25", "dense", "hybrid"],
     )
     evaluate.add_argument("--k", type=int, nargs="+", default=[1, 3, 5, 10])
+    evaluate_agent = subparsers.add_parser(
+        "evaluate-agent", help="Evaluate cited QA and produce a human-review packet"
+    )
+    evaluate_agent.add_argument("dataset", type=Path)
+    evaluate_agent.add_argument(
+        "--spec", type=Path, default=Path("configs/agents/cited_qa_pilot.yaml")
+    )
+    evaluate_agent.add_argument("--output-dir", type=Path, required=True)
+    evaluate_agent.add_argument("--pipeline-signature", required=True)
+    evaluate_agent.add_argument("--chunking-strategy", default="legal_structure")
+    evaluate_agent.add_argument("--effective-on", type=_iso_date)
+    evaluate_agent.add_argument("--allow-draft", action="store_true")
+    evaluate_agent.add_argument("--max-pairs", type=int)
+    score_review = subparsers.add_parser(
+        "score-agent-review", help="Score independently reviewed agent outputs"
+    )
+    score_review.add_argument("run_dir", type=Path)
+    score_review.add_argument("--output", type=Path, required=True)
+    score_review.add_argument("--allow-draft", action="store_true")
     return parser
 
 
@@ -294,6 +315,36 @@ async def _evaluate(arguments: argparse.Namespace) -> None:
         await database.dispose()
 
 
+async def _evaluate_agent(arguments: argparse.Namespace) -> None:
+    spec = load_agent_spec(arguments.spec)
+    llm = _llm_provider()
+    database = Database(get_settings())
+    try:
+        result = await run_agent_evaluation(
+            arguments.dataset,
+            arguments.output_dir,
+            RetrievalFilters(
+                pipeline_signature=arguments.pipeline_signature,
+                chunking_strategy=arguments.chunking_strategy,
+                effective_on=arguments.effective_on,
+            ),
+            spec,
+            SqlAlchemyRetrievalRepository(database),
+            (
+                _embedding_provider()
+                if spec.retrieval_strategy is not RetrievalStrategy.BM25
+                else None
+            ),
+            llm,
+            SqlAlchemyAgentRunRepository(database),
+            allow_draft=arguments.allow_draft,
+            max_pairs=arguments.max_pairs,
+        )
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+    finally:
+        await database.dispose()
+
+
 def main() -> None:
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
@@ -313,6 +364,26 @@ def main() -> None:
             asyncio.run(_evaluate(arguments))
         except (ValueError, FileNotFoundError) as error:
             raise SystemExit(f"Evaluation failed: {error}") from error
+    elif arguments.command == "evaluate-agent":
+        try:
+            asyncio.run(_evaluate_agent(arguments))
+        except (ValueError, FileNotFoundError) as error:
+            raise SystemExit(f"Agent evaluation failed: {error}") from error
+    elif arguments.command == "score-agent-review":
+        try:
+            print(
+                json.dumps(
+                    score_agent_review(
+                        arguments.run_dir,
+                        arguments.output,
+                        allow_draft=arguments.allow_draft,
+                    ),
+                    ensure_ascii=False,
+                    indent=2,
+                )
+            )
+        except (ValueError, FileNotFoundError, KeyError) as error:
+            raise SystemExit(f"Review scoring failed: {error}") from error
     elif arguments.command == "answer":
         try:
             asyncio.run(_answer(arguments))
