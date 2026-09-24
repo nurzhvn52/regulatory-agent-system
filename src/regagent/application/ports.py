@@ -1,7 +1,7 @@
 """Interfaces implemented by external providers and storage adapters."""
 
 from collections.abc import Sequence
-from typing import Protocol
+from typing import Any, Protocol
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -14,7 +14,7 @@ class LLMRequest(BaseModel):
 
     system_prompt: str
     user_prompt: str
-    response_schema: str | None = None
+    response_schema: dict[str, Any] | None = None
 
 
 class LLMResponse(BaseModel):

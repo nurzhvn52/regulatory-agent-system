@@ -4,7 +4,7 @@ languages:
   - ru
   - kk
 retrieval_strategy: hybrid
-top_k: 5
+top_k: 1
 reranker_enabled: false
 tools:
   - document_search

@@ -159,6 +159,16 @@ async def test_refuses_malformed_generation() -> None:
 
 
 @pytest.mark.asyncio
+async def test_refuses_extra_claims_outside_pilot_schema() -> None:
+    payload = json.loads(_draft())
+    payload["claims"].append(payload["claims"][0])
+    result = await CitedQAAgent(
+        FakeRetriever([_hit()]), FakeLLM([json.dumps(payload, ensure_ascii=False)])
+    ).answer(_spec(), "Вопрос", _filters())
+    assert result.status is AnswerStatus.REFUSED
+
+
+@pytest.mark.asyncio
 async def test_rejects_missing_date_before_retrieval() -> None:
     retriever = FakeRetriever([_hit()])
     with pytest.raises(ValueError, match="effective-on"):

@@ -64,7 +64,14 @@ class OpenAICompatibleLLM:
             "stream": False,
         }
         if request.response_schema:
-            payload["response_format"] = {"type": "json_object"}
+            payload["response_format"] = {
+                "type": "json_schema",
+                "json_schema": {
+                    "name": "regagent_response",
+                    "strict": True,
+                    "schema": request.response_schema,
+                },
+            }
         if self._client is not None:
             response = await self._client.post(
                 f"{self._base_url}/chat/completions",

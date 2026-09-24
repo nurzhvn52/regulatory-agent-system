@@ -38,6 +38,50 @@ answer grounding for that exact snapshot. It **does not establish** that the ver
 was legally effective on any date; do not use these outputs as current-law advice or
 as final dissertation results.
 
+### Verified local pilot (2026-09-24)
+
+On the development machine (RTX 4060 Laptop, 8 GiB VRAM), a portable Ollama
+`v0.34.4` instance served `qwen3:4b-instruct-2507-q4_K_M` locally. The model digest
+reported by `/api/tags` was
+`0edcdef34593eac1aa2be9c7d06c432dcf81945adca5eca2f27662c18f168ba0`.
+Ollama's OpenAI-compatible endpoint supports JSON Schema response formatting; the
+adapter passes the Pydantic schema, and the application still validates every field,
+chunk ID, quote, and claim after generation.
+
+Install Ollama from the [official Windows instructions](https://docs.ollama.com/windows)
+or use its standalone archive, then run
+`ollama pull qwen3:4b-instruct-2507-q4_K_M`. The portable binary and downloaded model
+used for this pilot are under the Git-ignored `models/` directory, not in the repo.
+With Ollama running and this model pulled, execute:
+
+```powershell
+$env:REGAGENT_LLM_PROVIDER = "openai_compatible"
+$env:REGAGENT_LLM_MODEL = "qwen3:4b-instruct-2507-q4_K_M"
+$env:REGAGENT_LLM_BASE_URL = "http://127.0.0.1:11434/v1"
+$env:HF_HOME = "D:\hf"
+$env:HF_HUB_OFFLINE = "1"
+$env:TRANSFORMERS_OFFLINE = "1"
+poetry run regagent answer "Кто осуществляет правовой мониторинг нормативных правовых актов?" `
+  --spec configs/agents/cited_qa_pilot.yaml `
+  --pipeline-signature 8cc110d69566d224ebebde20f022187eb19cead5992ced909fcb088ed697a88d `
+  --version-id 3ad9a4af-b595-436b-9ac9-dbd89db6ba05 `
+  --language ru `
+  --experiment-id pilot-qwen3-2026-09-24
+```
+
+The local pilot run `0b203328-11d4-4931-8c25-cfb48eb2746f` was `answered`, with
+an exact quote from article 50. Three earlier exploratory runs were `refused` for
+invalid citations, malformed structure, or an unsupported extra claim. These four
+runs are development observations, **not** a statistical quality estimate. Database
+UUIDs in the example belong to this local corpus and may differ after re-ingestion.
+The pilot config retrieves one chunk and the current answer schema allows one claim;
+multi-evidence answers remain a later research extension.
+
+As a negative control, the question about the amount of a fine for failing to perform
+legal monitoring returned `refused` in run `f64181c9-5aca-4bf1-9d09-fe996e619fc0`:
+the retrieved fragment did not state any fine. This is a single observed case, not a
+measured refusal rate.
+
 ## Verification boundary
 
 The verifier checks that every cited chunk was retrieved in scope and that each quote
