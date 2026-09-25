@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_DB: regagent
+          POSTGRES_USER: regagent
+          POSTGRES_PASSWORD: regagent
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U regagent"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      REGAGENT_DATABASE_URL: postgresql+psycopg://regagent:regagent@localhost:5432/regagent
+      REGAGENT_TEST_DATABASE_URL: postgresql+psycopg://regagent:regagent@localhost:5432/regagent
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install Poetry
+        run: pipx install poetry==2.1.3
+      # Locally torch comes from the CUDA index for GPU runs. The runner has no GPU,
+      # so CI resolves the same torch version from the CPU index instead.
+      - name: Use CPU torch
+        run: |
+          poetry source add --priority=explicit pytorch-cpu https://download.pytorch.org/whl/cpu
+          poetry add --lock --source pytorch-cpu "torch==2.14.0"
+      - run: poetry install --no-interaction
+      - run: poetry run ruff check .
+      - run: poetry run mypy src
+      - run: poetry run alembic upgrade head
+      - run: poetry run pytest
