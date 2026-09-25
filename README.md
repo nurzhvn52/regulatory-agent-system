@@ -1,5 +1,18 @@
 # Regulatory Agent System
 
+[![CI](https://github.com/nurzhvn52/regulatory-agent-system/actions/workflows/ci.yml/badge.svg)](https://github.com/nurzhvn52/regulatory-agent-system/actions/workflows/ci.yml)
+
+Ask a question about Kazakhstan's laws and get an answer that cites the exact article it
+came from, or a refusal when the documents do not support one. This is the codebase of my
+master's thesis at Astana IT University: it loads official legal acts in Russian and
+Kazakh, splits them along their legal structure, searches them with BM25, BGE-M3
+embeddings or both, and checks every citation in a generated answer against the source
+text.
+
+**Status:** research in progress. Retrieval and the cited-QA agent run end to end; the
+60-question pilot uses AI-drafted questions that are still waiting for expert review, so
+its numbers are not results yet.
+
 Research platform for generating evidence-grounded intelligent agents that analyse
 regulatory documents with lexical and vector retrieval plus large language models.
 
